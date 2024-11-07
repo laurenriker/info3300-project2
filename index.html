@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Info 3300 Project 2</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://d3js.org/topojson.v3.min.js"></script>
+  <style>
+    /**This styling is copied from 10/09 lecture notes*/
+    .state {
+      fill: lightblue; /* Change to a visible color */
+      stroke: black;   /* Add a border for better visibility */
+    }
+      .outline {
+        fill: none;
+        stroke: black;
+        stroke-width: 1px;
+      }
+      .graticule {
+          fill: none;
+          stroke: grey;
+          stroke-width: 1px;
+      }
+      .tooltip {
+          pointer-events: none;
+      }
+  </style>
+</head>
+
+<body>
+  <svg id="choropleth" height="600" width="900" style="background: #445; margin-top:50px"></svg>
+<script>
+  const svg = d3.select("#choropleth");
+  const width = svg.attr("width");
+  const height = svg.attr("height");
+  const margin = { top: 20, right: 20, bottom: 20, left:20};
+  const mapWidth = width - margin.left - margin.right;
+  const mapHeight = height - margin.top - margin.bottom;
+  const map = svg.append("g")
+                    .attr("transform","translate("+margin.left+","+margin.top+")");
+
+  //Not sure if this function is necessary but was in 10/09 notes                  
+  const testFunc = async function() {
+    
+    return "Hello" ;
+    
+  }
+  console.log( testFunc() );
+
+  //An async function to load data and build the map
+  const requestData = async function() {
+    
+    //Import data as synchronous call to topoJSON data file
+    const us = await d3.json("us-smaller.json");
+    console.log(us);
+  
+    //Pick out topographic features and build d3 helpers
+    var states = topojson.feature(us, us.objects.states);     // List of state outlines to fill
+    var statesMesh = topojson.mesh(us, us.objects.states);    // 'Mesh' of all outlines put together for a stroke
+    var projection = d3.geoAlbersUsa().fitSize([mapWidth, mapHeight], states);
+    var path = d3.geoPath().projection(projection);
+    console.log(states);
+    console.log(statesMesh);
+      //Add a graticule (we did this after 2c, but it must go here)
+      //(Graticules are much more configurable, but we'll use the default for now)
+    let graticule = d3.geoGraticule10();
+    console.log(graticule);
+    map.append("path").attr("class","graticule").attr("d", path(graticule));
+      
+      
+    //Draw states and outlines (see CSS at the top)
+    let statePaths = map.selectAll("path.state").data(states.features)
+                       .join("path")
+                       .attr("class", "state")
+                       .attr("note", d => d.id)  // debugging
+                       .attr("d", path)
+                       .on('mouseover',  mouseEntersState )
+                       .on('mouseout',  mouseLeavesState );
+    
+    map.append("path").datum(statesMesh)
+         .attr("class","outline")
+         .attr("d", path);
+
+    //Importing Driving Data
+    const surveyData = await d3.csv("Motor_Vehicle_Registrations_Dashboard_data.csv", d3.autoType);
+    console.log(surveyData);
+
+    //Generate the data structures we will need
+    var stateDict = {}  
+      surveyData.forEach( d => {
+        stateDict[d.state_code] = d;
+      });
+      console.log(stateDict)
+
+    map.selectAll(".state")
+         .style("fill", d => colorScale( stateDict[d.id].total ) );
+  }
+    
+  requestData();
+</script>
+
+</body>
+</html>
