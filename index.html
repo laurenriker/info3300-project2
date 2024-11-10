@@ -17,19 +17,29 @@
         stroke: black;
         stroke-width: 1px;
       }
-      .graticule {
+      .gridlines {
           fill: none;
           stroke: grey;
           stroke-width: 1px;
       }
       .tooltip {
-          pointer-events: none;
+        position: absolute;
+        background-color: white;
+        border: 1px solid #ccc;
+        padding: 5px;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s;
       }
   </style>
 </head>
 
 <body>
+  <p>Current Year:<span id="year-display">1900</span></p>
   <svg id="choropleth" height="600" width="900" style="background: #445; margin-top:50px"></svg>
+  <input type="range" id="slider" min="1900" max="2020" step="1" value="1900">
+  <div id="tooltip" class="tooltip"></div>
 <script>
   const svg = d3.select("#choropleth");
   const width = svg.attr("width");
@@ -40,42 +50,34 @@
   const map = svg.append("g")
                     .attr("transform","translate("+margin.left+","+margin.top+")");
 
-  //Not sure if this function is necessary but was in 10/09 notes                  
-  const testFunc = async function() {
-    
-    return "Hello" ;
-    
-  }
-  console.log( testFunc() );
-
+  const colorScale = d3.scaleSequential(d3.interpolateBlues)
+    .domain([0, 10000]);
+  const tooltip = d3.select("#tooltip");
+  let stateDict = {};                 
   //An async function to load data and build the map
   const requestData = async function() {
     
     //Import data as synchronous call to topoJSON data file
     const us = await d3.json("us-smaller.json");
-    console.log(us);
   
     //Pick out topographic features and build d3 helpers
-    var states = topojson.feature(us, us.objects.states);     // List of state outlines to fill
-    var statesMesh = topojson.mesh(us, us.objects.states);    // 'Mesh' of all outlines put together for a stroke
+    var states = topojson.feature(us, us.objects.states);   
+    var statesMesh = topojson.mesh(us, us.objects.states); 
     var projection = d3.geoAlbersUsa().fitSize([mapWidth, mapHeight], states);
     var path = d3.geoPath().projection(projection);
     console.log(states);
     console.log(statesMesh);
-      //Add a graticule (we did this after 2c, but it must go here)
-      //(Graticules are much more configurable, but we'll use the default for now)
-    let graticule = d3.geoGraticule10();
-    console.log(graticule);
-    map.append("path").attr("class","graticule").attr("d", path(graticule));
-      
-      
-    //Draw states and outlines (see CSS at the top)
+
+    let gridlines = d3.geoGraticule10();
+    map.append("path").attr("class","gridlines").attr("d", path(gridlines));
+       
+    //Draw states and outlines
     let statePaths = map.selectAll("path.state").data(states.features)
                        .join("path")
                        .attr("class", "state")
-                       .attr("note", d => d.id)  // debugging
                        .attr("d", path)
                        .on('mouseover',  mouseEntersState )
+                       .on('mousemove', mouseMoves)
                        .on('mouseout',  mouseLeavesState );
     
     map.append("path").datum(statesMesh)
@@ -84,17 +86,80 @@
 
     //Importing Driving Data
     const surveyData = await d3.csv("Motor_Vehicle_Registrations_Dashboard_data.csv", d3.autoType);
-    console.log(surveyData);
+    
+    // Create a dictionary to hold vehicle registration data by state and year
+    
+    surveyData.forEach(d => {
+      if (!stateDict[d.state_id]) {
+        stateDict[d.state_id] = {};
+      }
+      stateDict[d.state_id][d.year] = {
+        Auto: d.Auto,
+        Bus: d.Bus,
+        Truck: d.Truck,
+        Motorcycle: d.Motorcycle
+      };
+    });
 
-    //Generate the data structures we will need
-    var stateDict = {}  
-      surveyData.forEach( d => {
-        stateDict[d.state_code] = d;
-      });
-      console.log(stateDict)
+    //updateMap(1900, stateDict, states, path);
 
-    map.selectAll(".state")
-         .style("fill", d => colorScale( stateDict[d.id].total ) );
+    d3.select("#slider").on("input", function() {
+      const selectedYear = +this.value;
+      d3.select("#year-display").text(selectedYear);
+      updateMap(selectedYear, stateDict);
+    });
+
+    updateMap(1900, stateDict);
+
+  // Function to update the map based on the selected year
+    function updateMap(year, stateDict, states, path) {
+      map.selectAll(".state")
+        .style("fill", d => {
+          const registrations = stateDict[d.id] && stateDict[d.id][year]; // Safe check for year data
+          return colorScale(registrations || 0);  // Use 0 if no data for the selected year
+        });
+    }
+
+    // map.selectAll(".state")
+    //      .style("fill", d => colorScale( stateDict[d.id].total ) );
+
+  // Define mouseEnter and mouseLeave event functions
+  function mouseEntersState(event, d) {
+        const stateName = d.properties.name;
+        const year = +d3.select("#slider").property("value");
+        const data = stateDict[stateName] && stateDict[stateName][year];
+
+        if (data) {
+          tooltip.html(`
+            <strong>${stateName} (${year})</strong><br>
+            Auto: ${data.Auto}<br>
+            Bus: ${data.Bus}<br>
+            Truck: ${data.Truck}<br>
+            Motorcycle: ${data.Motorcycle}
+          `)
+          .style("opacity", 1);
+        } else {
+          tooltip.html(`
+            <strong>${stateName} (${year})</strong><br>
+            No data available
+          `)
+          .style("opacity", 1);
+        }
+
+        d3.select(this).style("fill", "orange");
+      }
+
+      function mouseMoves(event) {
+        tooltip.style("left", (event.pageX + 10) + "px")
+               .style("top", (event.pageY - 20) + "px");
+      }
+      function mouseLeavesState(event, d) {
+        tooltip.style("opacity", 0); // Hide tooltip
+        d3.select(this).style("fill", "lightblue"); // Reset fill color
+      }
+
+
+  
   }
     
   requestData();
