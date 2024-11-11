@@ -73,6 +73,18 @@
                        .attr("d", path)
                        .on('mouseover',  mouseEntersState )
                        .on('mouseout',  mouseLeavesState );
+
+function mouseEntersState() {
+    d3.select(this)  // 
+      .attr("stroke", "black")
+      .attr("stroke-width", 3); 
+}
+
+function mouseLeavesState() {
+    d3.select(this)
+      .attr("stroke", "black")
+      .attr("stroke-width", 1); 
+}
     
     map.append("path").datum(statesMesh)
          .attr("class","outline")
@@ -122,13 +134,6 @@
 
     updateMap(stateDict);
 
-    function mouseEntersState(event, d) {
-      d3.select("#current-state").text(`Current State: ${d.id}`); 
-    }
-
-  function mouseLeavesState() {
-    d3.select("#current-state").text("Current State:");
-  }
 
 
   const svg2 = d3.select("#bargraph");
