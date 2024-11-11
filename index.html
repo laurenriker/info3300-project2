@@ -65,8 +65,8 @@
 
     let gridlines = d3.geoGraticule10();
     map.append("path").attr("class","gridlines").attr("d", path(gridlines));
+
        
-    //Draw states and outlines
     let statePaths = map.selectAll("path.state").data(states.features)
                        .join("path")
                        .attr("class", "state")
@@ -75,15 +75,28 @@
                        .on('mouseout',  mouseLeavesState );
 
 function mouseEntersState() {
-    d3.select(this)  // 
-      .attr("stroke", "black")
-      .attr("stroke-width", 3); 
+    let state = d3.select(this); 
+    let stateID = state.datum().id;  
+    let stateData = stateDict[stateID];
+
+    txt.text(stateData.state_name);
+    txt2.text(stateData.total);
+
+    let bounds = path.bounds(state.datum());
+    let xPos = (bounds[0][0] + bounds[1][0]) / 2;
+    let yPos = bounds[1][1] - 15;
+
+    tooltip
+        .attr("transform", `translate(${xPos}, ${yPos})`)
+        .attr("visibility", "visible");
+
+    var mo = topojson.mesh(us, us.objects.states, (a, b) => a.id === stateID || b.id === stateID);
+    momesh.datum(mo).attr("d", path); 
 }
 
 function mouseLeavesState() {
-    d3.select(this)
-      .attr("stroke", "black")
-      .attr("stroke-width", 1); 
+    tooltip.attr("visibility", "hidden");
+    momesh.attr("d", "");
 }
     
     map.append("path").datum(statesMesh)
@@ -233,7 +246,42 @@ function mouseLeavesState() {
       };
       drawBarChart();
 
-  
+
+let tooltipWidth = 120;
+let tooltipHeight = 40;
+
+let momesh = map.append("path")
+    .attr("class", "mouseover outline")
+    .style("stroke", "black")
+    .style("stroke-width", 3)
+    .style("fill", "none")
+    .attr("d", "");
+
+let tooltip = map.append("g")
+    .attr("class", "tooltip")
+    .attr("visibility", "hidden");
+
+tooltip.append("rect")
+    .attr("fill", "black")
+    .attr("opacity", 0.9)
+    .attr("x", -tooltipWidth / 2.0)
+    .attr("y", 0)
+    .attr("width", tooltipWidth)
+    .attr("height", tooltipHeight);
+
+let txt = tooltip.append("text")
+    .attr("fill", "white")
+    .attr("text-anchor", "middle")
+    .attr("alignment-baseline", "hanging")
+    .attr("x", 0)
+    .attr("y", 2);
+
+let txt2 = tooltip.append("text")
+    .attr("fill", "white")
+    .attr("text-anchor", "middle")
+    .attr("alignment-baseline", "hanging")
+    .attr("x", 0)
+    .attr("y", 22);
   }
 
   requestData();
