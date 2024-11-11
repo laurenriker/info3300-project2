@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,6 +31,8 @@
   <p id="current-state">Current State:</p>
   <svg id="choropleth" height="600" width="900" style="background: #445; margin-top:50px"></svg>
   <input type="range" id="slider" min="1900" max="2020" step="1" value="1900">
+  <svg id="bargraph" height="600" width="900"></svg>
+
   <!-- <div id="tooltip" class="tooltip"></div> -->
 <script>
   const svg = d3.select("#choropleth");
@@ -116,76 +119,95 @@ function mouseLeavesState() {
   requestData();
 
   // Bar Chart for states
-  // d3.csv("Motor_Vehicle_Registrations_Dashboard_data.csv", d3.autoType).then(function(data1) {
-  //     function drawBarChart() {
-  //       const svg2 = d3.select("#bargraph");
-  //       const dataYear = data.filter((d) => d['year'] == 2020);
-  //       const dataState = data.filter((d) => d['state'] == 'Iowa');
-  //       const width2 = svg.attr("width");
-  //       const height2 = svg.attr("height");
-  //       const margins2 = { top: 20, right: 20, bottom: 100, left: 100 };
-  //       const chartWidth2 = width2 - margins2.left - margins2.right;
-  //       const chartHeight2 = height2 - margins2.top - margins2.bottom;
-  //       let grid = svg.append('g');
-  //       let chartArea2 = svg.append('g').attr("transform", `translate(${margins2.left},${margins2.top})`);
+  console.log(surveyData);
+  d3.csv("Motor_Vehicle_Registrations_Dashboard_data.csv", d3.autoType).then(function(data1) {
+    console.log(data1);
+      function drawBarChart() {
+        const svg2 = d3.select("#bargraph");
+        const dataYear = data1.filter((d) => d['year'] == 2020);
+        const dataState = data1.filter((d) => d['state'] == 'Iowa');
+        const width2 = svg2.attr("width");
+        const height2 = svg2.attr("height");
+        const margins2 = { top: 20, right: 20, bottom: 100, left: 100 };
+        const chartWidth2 = width2 - margins2.left - margins2.right;
+        const chartHeight2 = height2 - margins2.top - margins2.bottom;
+        let grid = svg2.append('g');
+        let chartArea2 = svg2.append('g').attr("transform", `translate(${margins2.left},${margins2.top})`);
+
+        y_minMax = [0, d3.max(data, d => Math.max(d.auto, d.bus, d.cycle) ) ];
+        const yScale = d3.scaleLinear()
+          .domain(y_minMax)
+          .range([chartHeight2, 0]);
+
+        const xScale = d3.scaleBand()
+          .domain(["Auto","Bus", "Truck", "Motorcycle"])
+          .range([0, chartWidth2])
+          .padding(0.2);
+
+        // xScale("Auto")
 
 
-  //       // const maxColumn = d3.max(data1, function(d)) {
-  //       //   return Math.max(d.Auto, d.Bus, d.Truck, d.Motorcycle);
-  //       // }
-
-  //       // const autoExtent = d3.extent(data1, d => d['Auto']);
-  //       // const busExtent = d3.extent(data1, d => d['Bus']);
-  //       // const truckExtent = d3.extent(data1, d => d['Truck']);
-  //       // const motorcycleExtent = d3.extent(data1, d => d['Motorcycle']);
-
-
-
-  //       // const driverages = d3.map(data1, d => d.Cohort);
-  //       // const xScale = d3.scaleBand()
-  //       //   .domain(driverages)
-  //       //   .range([0, chartWidth2])
-  //       //   .padding(0.2);
-
-  //       // const yScale = d3.scaleLinear()
-  //       //   .domain(driversExtent)
-  //       //   .range([chartHeight2, 0]);
-  
-
-  //       let leftAxis = d3.axisLeft(yScale);
-  //       grid.append('g')  
-  //         .attr('class', 'y axis')
-  //         .attr('transform', `translate(${margins2.left-10},${margins2.top})`)
-  //         .call(leftAxis);
+        let leftAxis = d3.axisLeft(yScale);
+        grid.append('g')  
+          .attr('class', 'y axis')
+          .attr('transform', `translate(${margins2.left-10},${margins2.top})`)
+          .call(leftAxis);
      
 
-  //       let leftGridlines = d3.axisLeft(yScale)
-  //         .tickSize(-chartWidth - 10)
-  //         .tickFormat('');
-  //       grid.append('g')  
-  //         .attr('class', 'y gridlines')
-  //         .attr('transform', `translate(${margins2.left-10},${margins2.top})`)
-  //         .call(leftGridlines);
+        let leftGridlines = d3.axisLeft(yScale)
+          .tickSize(-chartWidth2 - 10)
+          .tickFormat('');
+        grid.append('g')  
+          .attr('class', 'y gridlines')
+          .attr('transform', `translate(${margins2.left-10},${margins2.top})`)
+          .call(leftGridlines);
 
 
-  //       let bottomAxis = d3.axisBottom(xScale);
-  //       grid.append('g') 
-  //         .attr('class', 'x axis')
-  //         .attr('transform', `translate(${margins2.left},${chartHeight2 + margins2.top + 10})`)
-  //         .call(bottomAxis);
+        let bottomAxis = d3.axisBottom(xScale);
+        grid.append('g') 
+          .attr('class', 'x axis')
+          .attr('transform', `translate(${margins2.left},${chartHeight2 + margins2.top + 10})`)
+          .call(bottomAxis);
 
-  //       chartArea.selectAll('rect.bar').data(data1)
-  //         .join('rect').attr('class', 'bar')
-  //         .attr("fill", "blue")
-  //         .attr("x", d => xScale(d.Cohort) - 1)
-  //         .attr("y", d => yScale(d.Drivers))
-  //         .attr("height", d => yScale(0) - yScale(d.Drivers))
-  //         .attr("width", (xScale.bandwidth()));
 
-  //     }
-  //     drawBarChart();
+        chartArea2.selectAll("rect.auto").data(data1)
+                .join("rect")
+                .attr("class","auto")
+                .attr("x", xScale("Auto") )
+                .attr("y", d => yScale(d.Auto) )
+                .attr("width", xScale.bandwidth())
+                .attr("height", d => yScale(0) - yScale(d.Auto)); 
 
-  //   });
+
+        chartArea2.selectAll("rect.bus").data(data1)
+                .join("rect")
+                .attr("class","bus")
+                .attr("x", xScale("Bus") )
+                .attr("y", d => yScale(d.Bus) )
+                .attr("width", xScale.bandwidth())
+                .attr("height", d => yScale(0) - yScale(d.Bus)); 
+
+        
+        chartArea2.selectAll("rect.motor").data(data1)
+                .join("rect")
+                .attr("class","motor")
+                .attr("x", xScale("Motorcycle") )
+                .attr("y", d => yScale(d.Motorcycle) )
+                .attr("width", xScale.bandwidth())
+                .attr("height", d => yScale(0) - yScale(d.Motorcycle)); 
+
+        chartArea2.selectAll("rect.truck").data(data1)
+                .join("rect")
+                .attr("class","truck")
+                .attr("x", xScale("Truck") )
+                .attr("y", d => yScale(d.Truck) )
+                .attr("width", xScale.bandwidth())
+                .attr("height", d => yScale(0) - yScale(d.Truck)); 
+
+      }
+      drawBarChart();
+
+    });
 </script>
 
 </body>
