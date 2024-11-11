@@ -11,8 +11,10 @@
     .state {
       fill: lightblue; /* Change to a visible color */
       stroke: black;   /* Add a border for better visibility */
+      stroke-width: 2px; 
     }
-      .outline {
+    
+    .outline {
         fill: none;
         stroke: black;
         stroke-width: 1px;
@@ -40,6 +42,8 @@
   <svg id="choropleth" height="600" width="900" style="background: #445; margin-top:50px"></svg>
   <input type="range" id="slider" min="1900" max="2020" step="1" value="1900">
   <div id="tooltip" class="tooltip"></div>
+  <svg id="bargraph" height="600" width="600"></svg>
+
 <script>
   const svg = d3.select("#choropleth");
   const width = svg.attr("width");
@@ -58,7 +62,7 @@
   const requestData = async function() {
     
     //Import data as synchronous call to topoJSON data file
-    const us = await d3.json("us-smaller.json");
+    const us = await d3.json("us-state-coord.json");
   
     //Pick out topographic features and build d3 helpers
     var states = topojson.feature(us, us.objects.states);   
@@ -84,6 +88,11 @@
          .attr("class","outline")
          .attr("d", path);
 
+    var statenewDict = {}   // stateID ===> stateData
+    surveyData.forEach( d => {
+        statenewDict[d.state_id] = d;
+      });
+
     //Importing Driving Data
     const surveyData = await d3.csv("Motor_Vehicle_Registrations_Dashboard_data.csv", d3.autoType);
     
@@ -92,7 +101,9 @@
     surveyData.forEach(d => {
       if (!stateDict[d.state_id]) {
         stateDict[d.state_id] = {};
+
       }
+      console.log(stateDict);
       stateDict[d.state_id][d.year] = {
         Auto: d.Auto,
         Bus: d.Bus,
@@ -124,30 +135,57 @@
     //      .style("fill", d => colorScale( stateDict[d.id].total ) );
 
   // Define mouseEnter and mouseLeave event functions
-  function mouseEntersState(event, d) {
-        const stateName = d.properties.name;
-        const year = +d3.select("#slider").property("value");
-        const data = stateDict[stateName] && stateDict[stateName][year];
+  // function mouseEntersState(event, d) {
+  //         // console.log(d3.select(this.datum()));
 
-        if (data) {
-          tooltip.html(`
-            <strong>${stateName} (${year})</strong><br>
-            Auto: ${data.Auto}<br>
-            Bus: ${data.Bus}<br>
-            Truck: ${data.Truck}<br>
-            Motorcycle: ${data.Motorcycle}
-          `)
-          .style("opacity", 1);
-        } else {
-          tooltip.html(`
-            <strong>${stateName} (${year})</strong><br>
-            No data available
-          `)
-          .style("opacity", 1);
-        }
+    
+  //       const stateName = d.properties.name;
 
-        d3.select(this).style("fill", "orange");
+  //       const year = +d3.select("#slider").property("value");
+  //       const data = stateDict[stateName] && stateDict[stateName][year];
+
+  //       if (data) {
+  //         tooltip.html(`
+  //           <strong>${stateName} (${year})</strong><br>
+  //           Auto: ${data.Auto}<br>
+  //           Bus: ${data.Bus}<br>
+  //           Truck: ${data.Truck}<br>
+  //           Motorcycle: ${data.Motorcycle}
+  //         `)
+  //         .style("opacity", 1);
+  //       } else {
+  //         tooltip.html(`
+  //           <strong>${stateName} (${year})</strong><br>
+  //           No data available
+  //         `)
+  //         .style("opacity", 1);
+  //       }
+
+  //       d3.select(this).style("fill", "orange");
+  //     }
+
+  function mouseEntersState() {
+        // Make tooltip visible
+        tooltip.style("visibility","visible")
+    
+        // Find the state SVG element and add stroke
+        let state = d3.select(this);
+        
+        // // Original version before adding the bonus mesh
+        // state.attr("stroke","black")
+        //      .attr("stroke-width", 3);
+        
+        // Using .datum() to recover the data for the state element (because we used a .join() to make it)...
+        // ... get the name of the state and count
+        let stateID = state.datum().id;
+        let stateDat = stateDict[stateID];
+        console.log(stateID);
+        
+    
       }
+
+
+
 
       function mouseMoves(event) {
         tooltip.style("left", (event.pageX + 10) + "px")
@@ -155,7 +193,7 @@
       }
       function mouseLeavesState(event, d) {
         tooltip.style("opacity", 0); // Hide tooltip
-        d3.select(this).style("fill", "lightblue"); // Reset fill color
+        d3.select(this).style("fill", "white"); // Reset fill color
       }
 
 
@@ -163,6 +201,88 @@
   }
     
   requestData();
+
+  // Bar Chart for states
+  // d3.csv("Motor_Vehicle_Registrations_Dashboard_data.csv", d3.autoType).then(function(data1) {
+  //     function drawBarChart() {
+  //       const svg2 = d3.select("#bargraph");
+  //       const dataYear = data.filter((d) => d['year'] == 2020);
+  //       const dataState = data.filter((d) => d['state'] == 'Iowa');
+  //       const width2 = svg.attr("width");
+  //       const height2 = svg.attr("height");
+  //       const margins2 = { top: 20, right: 20, bottom: 100, left: 100 };
+  //       const chartWidth2 = width2 - margins2.left - margins2.right;
+  //       const chartHeight2 = height2 - margins2.top - margins2.bottom;
+  //       let grid = svg.append('g');
+  //       let chartArea2 = svg.append('g').attr("transform", `translate(${margins2.left},${margins2.top})`);
+
+
+  //       // const maxColumn = d3.max(data1, function(d)) {
+  //       //   return Math.max(d.Auto, d.Bus, d.Truck, d.Motorcycle);
+  //       // }
+
+  //       // const autoExtent = d3.extent(data1, d => d['Auto']);
+  //       // const busExtent = d3.extent(data1, d => d['Bus']);
+  //       // const truckExtent = d3.extent(data1, d => d['Truck']);
+  //       // const motorcycleExtent = d3.extent(data1, d => d['Motorcycle']);
+
+
+
+  //       // const driverages = d3.map(data1, d => d.Cohort);
+  //       // const xScale = d3.scaleBand()
+  //       //   .domain(driverages)
+  //       //   .range([0, chartWidth2])
+  //       //   .padding(0.2);
+
+  //       // const yScale = d3.scaleLinear()
+  //       //   .domain(driversExtent)
+  //       //   .range([chartHeight2, 0]);
+  
+
+  //       let leftAxis = d3.axisLeft(yScale);
+  //       grid.append('g')  
+  //         .attr('class', 'y axis')
+  //         .attr('transform', `translate(${margins2.left-10},${margins2.top})`)
+  //         .call(leftAxis);
+     
+
+  //       let leftGridlines = d3.axisLeft(yScale)
+  //         .tickSize(-chartWidth - 10)
+  //         .tickFormat('');
+  //       grid.append('g')  
+  //         .attr('class', 'y gridlines')
+  //         .attr('transform', `translate(${margins2.left-10},${margins2.top})`)
+  //         .call(leftGridlines);
+
+
+  //       let bottomAxis = d3.axisBottom(xScale);
+  //       grid.append('g') 
+  //         .attr('class', 'x axis')
+  //         .attr('transform', `translate(${margins2.left},${chartHeight2 + margins2.top + 10})`)
+  //         .call(bottomAxis);
+
+  //       chartArea.selectAll('rect.bar').data(data1)
+  //         .join('rect').attr('class', 'bar')
+  //         .attr("fill", "blue")
+  //         .attr("x", d => xScale(d.Cohort) - 1)
+  //         .attr("y", d => yScale(d.Drivers))
+  //         .attr("height", d => yScale(0) - yScale(d.Drivers))
+  //         .attr("width", (xScale.bandwidth()));
+
+  //     }
+  //     drawBarChart();
+
+  //   });
+
+  
+
+
+
+
+
+
+
+
 </script>
 
 </body>
