@@ -10,8 +10,8 @@
   <style>
     /**This styling is copied from 10/09 lecture notes*/
     .state {
-      fill: lightblue; /* Change to a visible color */
-      stroke: black;   /* Add a border for better visibility */
+      fill: lightblue;
+      stroke: black;  
     }
       .outline {
         fill: none;
@@ -41,10 +41,14 @@
   const margin = { top: 20, right: 20, bottom: 20, left:20};
   const mapWidth = width - margin.left - margin.right;
   const mapHeight = height - margin.top - margin.bottom;
-  const map = svg.append("g")
-                    .attr("transform","translate("+margin.left+","+margin.top+")");
+  const map = svg.append("g").attr("transform","translate("+margin.left+","+margin.top+")");
 
-  let stateDict = {};                 
+  let stateDict = {};        
+  var currentYear;  
+
+  const surveyData = d3.csv("Motor_Vehicle_Registrations_Dashboard_data.csv");
+
+       
   //An async function to load data and build the map
   const requestData = async function() {
     
@@ -68,7 +72,6 @@
                        .attr("class", "state")
                        .attr("d", path)
                        .on('mouseover',  mouseEntersState )
-                       //.on('mousemove', mouseMoves)
                        .on('mouseout',  mouseLeavesState );
     
     map.append("path").datum(statesMesh)
@@ -76,7 +79,7 @@
          .attr("d", path);
 
     const surveyData = await d3.csv("Motor_Vehicle_Registrations_Dashboard_data.csv", d3.autoType);
-    
+
     surveyData.forEach(d => {
       if (!stateDict[d.state]) {
         stateDict[d.state] = {};
@@ -89,52 +92,72 @@
       };
     });
 
-    function updateMap(year, data) {
+
+    // slider.on("change", sliderChanged)
+    // function sliderChanged (
+    //   currentYear = slider.value
+    //   updateMap()
+    // );
+
+    // // sliderChanged()
+
+
+    function updateMap(data) {
+      let selectedYear = +d3.select("#slider").property("value");
+      console.log(selectedYear);
+
       map.selectAll(".state")
         .style("fill", d => {
           const stateName = d.id; 
-          const stateData = data[stateName] ? data[stateName][year] : null;
+          const stateData = data[stateName] ? data[stateName][selectedYear] : null;
         });
     }
 
     d3.select("#slider").on("input", function() {
       const selectedYear = +this.value;
       d3.select("#year-display").text(selectedYear);
-      updateMap(selectedYear, stateDict);
+      updateMap(stateDict)
+      drawBarChart();
     });
 
-    updateMap(1900, stateDict);
+    updateMap(stateDict);
 
     function mouseEntersState(event, d) {
-  d3.select("#current-state").text(`Current State: ${d.id}`); 
-}
+      d3.select("#current-state").text(`Current State: ${d.id}`); 
+    }
 
-function mouseLeavesState() {
-  d3.select("#current-state").text("Current State:");
-}
-
-  
+  function mouseLeavesState() {
+    d3.select("#current-state").text("Current State:");
   }
-    
-  requestData();
 
-  // Bar Chart for states
-  console.log(surveyData);
-  d3.csv("Motor_Vehicle_Registrations_Dashboard_data.csv", d3.autoType).then(function(data1) {
-    console.log(data1);
-      function drawBarChart() {
-        const svg2 = d3.select("#bargraph");
-        const dataYear = data1.filter((d) => d['year'] == 2020);
-        const dataState = data1.filter((d) => d['state'] == 'Iowa');
-        const width2 = svg2.attr("width");
-        const height2 = svg2.attr("height");
-        const margins2 = { top: 20, right: 20, bottom: 100, left: 100 };
-        const chartWidth2 = width2 - margins2.left - margins2.right;
-        const chartHeight2 = height2 - margins2.top - margins2.bottom;
-        let grid = svg2.append('g');
-        let chartArea2 = svg2.append('g').attr("transform", `translate(${margins2.left},${margins2.top})`);
 
-        y_minMax = [0, d3.max(data, d => Math.max(d.auto, d.bus, d.cycle) ) ];
+  const svg2 = d3.select("#bargraph");
+  const width2 = svg2.attr("width");
+  const height2 = svg2.attr("height");
+  const margins2 = { top: 20, right: 20, bottom: 100, left: 100 };
+  const chartWidth2 = width2 - margins2.left - margins2.right;
+  const chartHeight2 = height2 - margins2.top - margins2.bottom;
+
+  let grid = svg2.append('g');
+  let leftG = grid.append('g');
+  let leftGridG = grid.append('g');
+  let bottomG = grid.append('g');
+  let chartArea2 = svg2.append('g').attr("transform", `translate(${margins2.left},${margins2.top})`);
+
+
+
+  function drawBarChart() {
+        let selectedYear = +d3.select("#slider").property("value");
+        barchartData = surveyData.filter( (d) => {return d['year'] == selectedYear;});
+        console.log(barchartData);
+
+        barchartData = barchartData.filter( (d) => {return d['state'] == 'Iowa';});
+        console.log(barchartData);
+
+       
+        stateData = surveyData.filter( (d) => {return d['state'] == 'Iowa';});
+
+        y_minMax = [0, d3.max(stateData, d => Math.max(d.Auto, d.Bus, d.Truck, d.Motorcycle,) ) ];
         const yScale = d3.scaleLinear()
           .domain(y_minMax)
           .range([chartHeight2, 0]);
@@ -148,8 +171,8 @@ function mouseLeavesState() {
 
 
         let leftAxis = d3.axisLeft(yScale);
-        grid.append('g')  
-          .attr('class', 'y axis')
+         
+        leftG.attr('class', 'y axis')
           .attr('transform', `translate(${margins2.left-10},${margins2.top})`)
           .call(leftAxis);
      
@@ -157,20 +180,19 @@ function mouseLeavesState() {
         let leftGridlines = d3.axisLeft(yScale)
           .tickSize(-chartWidth2 - 10)
           .tickFormat('');
-        grid.append('g')  
-          .attr('class', 'y gridlines')
+        leftGridG.attr('class', 'y gridlines')
           .attr('transform', `translate(${margins2.left-10},${margins2.top})`)
           .call(leftGridlines);
 
 
         let bottomAxis = d3.axisBottom(xScale);
-        grid.append('g') 
-          .attr('class', 'x axis')
+        bottomG.attr('class', 'x axis')
           .attr('transform', `translate(${margins2.left},${chartHeight2 + margins2.top + 10})`)
           .call(bottomAxis);
 
 
-        chartArea2.selectAll("rect.auto").data(data1)
+
+        chartArea2.selectAll("rect.auto").data(barchartData)
                 .join("rect")
                 .attr("class","auto")
                 .attr("x", xScale("Auto") )
@@ -179,7 +201,7 @@ function mouseLeavesState() {
                 .attr("height", d => yScale(0) - yScale(d.Auto)); 
 
 
-        chartArea2.selectAll("rect.bus").data(data1)
+        chartArea2.selectAll("rect.bus").data(barchartData)
                 .join("rect")
                 .attr("class","bus")
                 .attr("x", xScale("Bus") )
@@ -187,16 +209,7 @@ function mouseLeavesState() {
                 .attr("width", xScale.bandwidth())
                 .attr("height", d => yScale(0) - yScale(d.Bus)); 
 
-        
-        chartArea2.selectAll("rect.motor").data(data1)
-                .join("rect")
-                .attr("class","motor")
-                .attr("x", xScale("Motorcycle") )
-                .attr("y", d => yScale(d.Motorcycle) )
-                .attr("width", xScale.bandwidth())
-                .attr("height", d => yScale(0) - yScale(d.Motorcycle)); 
-
-        chartArea2.selectAll("rect.truck").data(data1)
+        chartArea2.selectAll("rect.truck").data(barchartData)
                 .join("rect")
                 .attr("class","truck")
                 .attr("x", xScale("Truck") )
@@ -204,10 +217,26 @@ function mouseLeavesState() {
                 .attr("width", xScale.bandwidth())
                 .attr("height", d => yScale(0) - yScale(d.Truck)); 
 
-      }
+        chartArea2.selectAll("rect.motor").data(barchartData)
+                .join("rect")
+                .attr("class","motor")
+                .attr("x", xScale("Motorcycle") )
+                .attr("y", d => yScale(d.Motorcycle) )
+                .attr("width", xScale.bandwidth())
+                .attr("height", d => yScale(0) - yScale(d.Motorcycle)); 
+
+      };
       drawBarChart();
 
-    });
+  
+  }
+
+  requestData();
+
+  // Bar Chart for states
+   
+
+
 </script>
 
 </body>
