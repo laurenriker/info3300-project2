@@ -44,6 +44,10 @@
   <input type="range" id="slider" min="1900" max="2020" step="1" value="1950">
   <svg id="bargraph" height="600" width="900"></svg>
   <div id="tooltip" class="tooltip"></div>
+  <svg id="lineplot" height="600" width="900"></svg>
+
+
+
 <script>
   const svg = d3.select("#choropleth");
   const width = svg.attr("width");
@@ -53,7 +57,14 @@
   const mapHeight = height - margin.top - margin.bottom;
   const map = svg.append("g").attr("transform","translate("+margin.left+","+margin.top+")");
 
-  let stateDict = {};        
+  let stateDict = {};      
+  let autoDict = {};     
+  let yearDict = {};
+  let busDict = {};     
+  let truckDict = {};     
+  let motorDict = {};
+   
+  
   var currentYear = 1950;
   var selectedState = 'Alabama';  
 
@@ -202,7 +213,7 @@ function mouseLeavesState() {
               .attr('y', margins2.left-64)
               .attr("class", "title") 
               .text('The Number of Registered Vehicles in 1950 in Alabama');
-
+  //call bar chart function
   function drawBarChart() {
         if (!selectedState) return; 
         let selectedYear = +d3.select("#slider").property("value");
@@ -279,6 +290,193 @@ function mouseLeavesState() {
 
       };
       drawBarChart();
+
+
+    
+    // LinePlot 
+ 
+    //Setting up dictionaries for each vehicle dataset
+    surveyData.forEach(d => {
+       if (!autoDict[d.year]) {
+        autoDict[d.year] = 0;
+        }
+        autoDict[d.year] += d.Auto;
+    });
+    surveyData.forEach(d => {
+       if (!busDict[d.year]) {
+        busDict[d.year] = 0;
+        }
+        busDict[d.year] += d.Bus;
+    });
+    surveyData.forEach(d => {
+       if (!motorDict[d.year]) {
+        motorDict[d.year] = 0;
+        }
+        motorDict[d.year] += d.Motorcycle;
+    });
+    surveyData.forEach(d => {
+       if (!truckDict[d.year]) {
+        truckDict[d.year] = 0;
+        }
+        truckDict[d.year] += d.Truck;
+    });
+    surveyData.forEach(d => {
+      d.total = d.Auto + d.Bus + d.Motorcycle + d.Truck;
+       if (!yearDict[d.year]) {
+        yearDict[d.year] = 0;
+        }
+        yearDict[d.year] += d.total;
+    });
+
+    //making graph
+
+    const svg3 = d3.select("svg#lineplot");
+    const width3 = svg.attr("width");
+    const height3 = svg.attr("height");
+    const margin3 = {top: 10, right: 10, bottom: 50, left: 100};
+    const chartWidth3 = width3 - margin3.left - margin3.right;
+    const chartHeight3 = height - margin3.top - margin3.bottom;
+    let grid3 = svg3.append('g');
+    let leftG3 = grid3.append('g');
+    let leftGridG3 = grid3.append('g');
+    let bottomG3 = grid3.append('g');
+    let bottomGridG3 = grid3.append('g');
+    let chartArea3 = svg3.append("g").attr("id","points")
+                    .attr("transform",`translate(${margin3.left},${margin3.top})`);
+
+    //Labeling
+    svg3.append('text')
+                .attr('x', - (chartHeight3 / 2)-60)
+                .attr('y', margin3.left-70)
+                .attr('transform', 'rotate(-90)')
+                .attr('text-anchor', 'middle')
+                .text('Number of Registered Vehicles');
+
+    svg3.append('text')
+                .attr('x', width3 / 2)
+                .attr('y', margin3.left + 497)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '15px')
+                .text('Years');   
+
+    svg3.append('text')
+                .attr("id", "barTitle") 
+                .attr('x', width3 / 2)
+                .attr('y', margin3.left-64)
+                .attr("class", "title") 
+                .text('The Total Number of Registered Vehciels throughout the years');
+    //line plot function
+    function drawLinePlot () {
+      //converting all of the dictionaries into datasets
+      const yearData = Object.keys(yearDict).map(year => ({
+        year: +year,
+        total: yearDict[year]
+      }));
+      const busData = Object.keys(busDict).map(year => ({
+        year: +year,
+        busTotal: busDict[year]
+      }));
+      const motorData = Object.keys(motorDict).map(year => ({
+        year: +year,
+        motorTotal: motorDict[year]
+      }));
+      const truckData = Object.keys(truckDict).map(year => ({
+        year: +year,
+        truckTotal: truckDict[year]
+      }));
+      const autoData = Object.keys(autoDict).map(year => ({
+        year: +year,
+        autoTotal: autoDict[year]
+      }));
+
+      //axis and gridlines and scales
+      vehicleMax = [0, d3.max(yearData, d => d.total) ];
+      const yScale3 = d3.scaleLinear().domain(vehicleMax).range([chartHeight3, 0]);
+      let leftAxis = d3.axisLeft(yScale3)
+      let leftGridlines = d3.axisLeft(yScale3)
+                            .tickSize(-chartWidth3-10)
+                            .tickFormat("")
+      leftG3.attr("class", "y axis")
+        .attr("transform",`translate(${margin3.left-10},${margin3.top})`)
+        .call(leftAxis)
+      leftGridG3.attr("class", "y gridlines")
+        .attr("transform",`translate(${margin3.left-10},${margin3.top})`)
+        .call(leftGridlines);
+
+      const dateExtent = d3.extent(yearData, d => d.year);
+      const xScale3 = d3.scaleTime().domain(dateExtent).range([0,chartWidth3]);
+      let bottomAxis = d3.axisBottom(xScale3)
+      let bottomGridlines = d3.axisBottom(xScale3)
+                              .tickSize(-chartHeight3-10)
+                              .tickFormat("")
+      bottomGridG3.attr("class", "x axis")
+          .attr("transform",`translate(${margin3.left},${chartHeight3+margin3.top+10})`)
+          .call(bottomAxis);
+      bottomG3.attr("class", "x gridlines")
+        .attr("transform",`translate(${margin3.left},${chartHeight3+margin3.top+10})`)
+        .call(bottomGridlines);
+
+
+  
+      //Bus Line
+      const busLine = d3.line()
+                      .x( d => xScale3(d.year) )
+                      .y( d => yScale3(d.busTotal) )
+                      .curve(d3.curveMonotoneX); 
+      chartArea3.append("path")
+              .datum(busData)
+              .attr("class", "line")
+              .attr("class","bus")
+              .attr("fill", "none") 
+              .attr("stroke", "steelblue")
+              .attr("stroke-width", 3)
+              .attr("d", busLine);
+      //Truck Line
+      const truckLine = d3.line()
+                      .x( d => xScale3(d.year) )
+                      .y( d => yScale3(d.truckTotal) )
+                      .curve(d3.curveMonotoneX); 
+      chartArea3.append("path")
+              .datum(truckData)
+              .attr("class", "line")
+              .attr("class","truck")
+              .attr("fill", "none") 
+              .attr("stroke", "green")
+              .attr("stroke-width", 3)
+              .attr("d", truckLine);
+      //Auto Line
+      const autoLine = d3.line()
+                      .x( d => xScale3(d.year) )
+                      .y( d => yScale3(d.autoTotal) )
+                      .curve(d3.curveMonotoneX); 
+      chartArea3.append("path")
+              .datum(autoData)
+              .attr("class", "line")
+              .attr("class","auto")
+              .attr("fill", "none") 
+              .attr("stroke", "red")
+              .attr("stroke-width", 3)
+              .attr("d", autoLine);
+      //Motor Line
+      const motorLine = d3.line()
+                      .x( d => xScale3(d.year) )
+                      .y( d => yScale3(d.motorTotal) )
+                      .curve(d3.curveMonotoneX); 
+
+      chartArea3.append("path")
+              .datum(motorData)
+              .attr("class", "line")
+              .attr("class","motor")
+              .attr("fill", "none") 
+              .attr("stroke", "purple")
+              .attr("stroke-width", 3)
+              .attr("d", motorLine);
+
+
+    }
+    //call lineplot
+    drawLinePlot ()   
+
 
     //Creating Tooltip
 
