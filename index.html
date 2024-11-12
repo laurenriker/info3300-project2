@@ -1,6 +1,3 @@
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,6 +30,13 @@
         font-weight: bold;       
         text-anchor: middle;    
       }
+
+      .legend {
+    position: fixed;
+    top: 10px; /* Adjust the top value to position it higher on the screen */
+    right: 10px; /* Adjust for horizontal positioning */
+    z-index: 1000; /* Ensure it's on top of other elements */
+}
       
   </style>
 </head>
@@ -40,13 +44,11 @@
 <body>
   <p>Current Year: <span id="year-display">1950</span></p>
   <p>Current State: <span id="state-display">Alabama</span></p>
-  <svg id="choropleth" height="600" width="900" style="background: #445; margin-top:50px"></svg>
+  <svg id="choropleth" height="400" width="700" style="background: #445; margin-top:50px"></svg>
   <input type="range" id="slider" min="1900" max="2020" step="1" value="1950">
-  <svg id="bargraph" height="600" width="900"></svg>
+  <svg id="bargraph" height="400" width="700"></svg>
   <div id="tooltip" class="tooltip"></div>
-  <svg id="lineplot" height="600" width="900"></svg>
-
-
+  <svg id="lineplot" height="400" width="700"></svg>
 
 <script>
   const svg = d3.select("#choropleth");
@@ -110,7 +112,6 @@
       drawBarChart(specificData);
     }
 
-
     //Tooltip when hovering over the states
     function mouseEntersState() {
     // d3.select("#current-state").text(`${us.id}`); 
@@ -129,7 +130,6 @@
 
     var mo = topojson.mesh(us, us.objects.states, (a, b) => a.id === stateID || b.id === stateID);
     txt.text(stateID);
-
 
     momesh.datum(mo).attr("d", path); 
 }
@@ -184,7 +184,7 @@ function mouseLeavesState() {
   const svg2 = d3.select("#bargraph");
   const width2 = svg2.attr("width");
   const height2 = svg2.attr("height");
-  const margins2 = { top: 20, right: 20, bottom: 100, left: 100 };
+  const margins2 = { top: 50, right: 20, bottom: 100, left: 100 };
   const chartWidth2 = width2 - margins2.left - margins2.right;
   const chartHeight2 = height2 - margins2.top - margins2.bottom;
   let grid = svg2.append('g');
@@ -210,7 +210,7 @@ function mouseLeavesState() {
    svg2.append('text')
               .attr("id", "barTitle") 
               .attr('x', width2 / 2)
-              .attr('y', margins2.left-64)
+              .attr('y', margins2.top / 2)
               .attr("class", "title") 
               .text('The Number of Registered Vehicles in 1950 in Alabama');
   //call bar chart function
@@ -242,7 +242,8 @@ function mouseLeavesState() {
 
 
       //Gridlines and axis
-        let leftAxis = d3.axisLeft(yScale);
+        let leftAxis = d3.axisLeft(yScale)
+        .tickFormat(d3.format(".2s"));
         leftG.attr('class', 'y axis')
           .attr('transform', `translate(${margins2.left-10},${margins2.top})`)
           .call(leftAxis);
@@ -333,7 +334,7 @@ function mouseLeavesState() {
     const svg3 = d3.select("svg#lineplot");
     const width3 = svg.attr("width");
     const height3 = svg.attr("height");
-    const margin3 = {top: 10, right: 10, bottom: 50, left: 100};
+    const margin3 = { top: 50, right: 20, bottom: 100, left: 100 };
     const chartWidth3 = width3 - margin3.left - margin3.right;
     const chartHeight3 = height - margin3.top - margin3.bottom;
     let grid3 = svg3.append('g');
@@ -354,7 +355,7 @@ function mouseLeavesState() {
 
     svg3.append('text')
                 .attr('x', width3 / 2)
-                .attr('y', margin3.left + 497)
+                .attr('y', margin3.top + 497)
                 .attr('text-anchor', 'middle')
                 .attr('font-size', '15px')
                 .text('Years');   
@@ -362,9 +363,9 @@ function mouseLeavesState() {
     svg3.append('text')
                 .attr("id", "barTitle") 
                 .attr('x', width3 / 2)
-                .attr('y', margin3.left-64)
+                .attr('y', margin3.top / 2)
                 .attr("class", "title") 
-                .text('The Total Number of Registered Vehciels throughout the years');
+                .text('The Total Number of Registered Vehicles throughout the years');
     //line plot function
     function drawLinePlot () {
       //converting all of the dictionaries into datasets
@@ -393,6 +394,7 @@ function mouseLeavesState() {
       vehicleMax = [0, d3.max(yearData, d => d.total) ];
       const yScale3 = d3.scaleLinear().domain(vehicleMax).range([chartHeight3, 0]);
       let leftAxis = d3.axisLeft(yScale3)
+      .tickFormat(d3.format(".2s"));
       let leftGridlines = d3.axisLeft(yScale3)
                             .tickSize(-chartWidth3-10)
                             .tickFormat("")
@@ -406,18 +408,20 @@ function mouseLeavesState() {
       const dateExtent = d3.extent(yearData, d => d.year);
       const xScale3 = d3.scaleTime().domain(dateExtent).range([0,chartWidth3]);
       let bottomAxis = d3.axisBottom(xScale3)
+      bottomG.attr('class', 'x axis')
+      .attr('transform', `translate(${margins2.left},${chartHeight2 + margins2.top + 10})`)
+      .call(bottomAxis);
       let bottomGridlines = d3.axisBottom(xScale3)
                               .tickSize(-chartHeight3-10)
                               .tickFormat("")
-      bottomGridG3.attr("class", "x axis")
-          .attr("transform",`translate(${margin3.left},${chartHeight3+margin3.top+10})`)
-          .call(bottomAxis);
+       bottomGridG3.attr("class", "x axis")
+           .attr("transform",`translate(${margin3.left},${chartHeight3+margin3.top+10})`)
+           .call(bottomAxis);
       bottomG3.attr("class", "x gridlines")
         .attr("transform",`translate(${margin3.left},${chartHeight3+margin3.top+10})`)
         .call(bottomGridlines);
 
 
-  
       //Bus Line
       const busLine = d3.line()
                       .x( d => xScale3(d.year) )
@@ -473,6 +477,41 @@ function mouseLeavesState() {
               .attr("d", motorLine);
 
 
+        //Legend labels
+        svg3.append('text')
+              .attr('x', width3 - 30)
+              .attr('y', height3 -30)
+              .attr('text-anchor', 'middle')
+              .attr('font-size', '15px')
+              .style('color', 'purple')
+              .text('Motor'); 
+
+        svg3.append('text')
+              .attr('x', width3 - 30)
+              .attr('y', height3 - 45)
+              .attr('text-anchor', 'middle')
+              .attr('font-size', '15px')
+              .style('color', 'red')
+              .text('Auto'); 
+
+        svg3.append('text')
+              .attr('x', width3 - 30)
+              .attr('y', height3 - 60)
+              .attr('text-anchor', 'middle')
+              .attr('font-size', '15px')
+              .style('color', 'steelblue')
+              .text('Bus'); 
+
+        svg3.append('text')
+              .attr('x', width3 - 30)
+              .attr('y', height3 - 15)
+              .attr('text-anchor', 'middle')
+              .attr('font-size', '15px')
+              .style('color', 'green')
+              .text('Truck'); 
+
+        //then need to do rectangles - can copy what we did from p1
+  
     }
     //call lineplot
     drawLinePlot ()   
@@ -509,8 +548,7 @@ function mouseLeavesState() {
 
   requestData();
 
-   
-
+  
 
 </script>
 
