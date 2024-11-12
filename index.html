@@ -88,6 +88,8 @@
     
     //Updating the bar chart based on the selected state
     function mouseClickState(event, d) {
+      d3.selectAll(".state").attr("class", "state");
+      d3.select(this).attr("class", "state selected");
       let stateID = d.id;
       let stateData = stateDict[stateID];
       selectedState = stateID;
@@ -316,4 +318,3 @@ function mouseLeavesState() {
 
 </body>
 </html>
-
