@@ -9,10 +9,13 @@
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://d3js.org/topojson.v3.min.js"></script>
   <style>
-    /**This styling is copied from 10/09 lecture notes*/
     .state {
       fill: lightblue;
       stroke: black;  
+    }
+
+    .state.selected {
+      fill: pink;
     }
       .outline {
         fill: none;
@@ -24,16 +27,22 @@
           stroke: grey;
           stroke-width: 1px;
       }
+
+      .title {
+        font-size: 20px;        
+        font-weight: bold;       
+        text-anchor: middle;    
+      }
+      
   </style>
 </head>
 
 <body>
-  <p>Current Year: <span id="year-display">1900</span></p>
-  <!-- <p id="current-state">Current State:</p> -->
+  <p>Current Year: <span id="year-display">1950</span></p>
+  <p>Current State: <span id="state-display">Alabama</span></p>
   <svg id="choropleth" height="600" width="900" style="background: #445; margin-top:50px"></svg>
-  <input type="range" id="slider" min="1900" max="2020" step="1" value="1900">
+  <input type="range" id="slider" min="1900" max="2020" step="1" value="1950">
   <svg id="bargraph" height="600" width="900"></svg>
-
   <div id="tooltip" class="tooltip"></div>
 <script>
   const svg = d3.select("#choropleth");
@@ -45,7 +54,8 @@
   const map = svg.append("g").attr("transform","translate("+margin.left+","+margin.top+")");
 
   let stateDict = {};        
-  var currentYear;  
+  var currentYear = 1950;
+  var selectedState = 'Alabama';  
 
   const surveyData = d3.csv("Motor_Vehicle_Registrations_Dashboard_data.csv");
 
@@ -73,10 +83,25 @@
                        .attr("class", "state")
                        .attr("d", path)
                        .on('mouseover',  mouseEntersState)
-                       .on('mouseout',  mouseLeavesState);
+                       .on('mouseout',  mouseLeavesState)
+                       .on('click', mouseClickState);
+    
+    //Updating the bar chart based on the selected state
+    function mouseClickState(event, d) {
+      let stateID = d.id;
+      let stateData = stateDict[stateID];
+      selectedState = stateID;
+      const selectedYear = +d3.select("#slider").property("value");
+      d3.select("#state-display").text(selectedState);
+      const specificData = stateData ? stateData[selectedYear] : null;
+      drawBarChart(specificData);
+    }
 
 
+    //Tooltip when hovering over the states
     function mouseEntersState() {
+    // d3.select("#current-state").text(`${us.id}`); 
+
     let state = d3.select(this); 
     let stateID = state.datum().id;  
     let stateData = stateDict[stateID];
@@ -90,14 +115,12 @@
         .attr("visibility", "visible");
 
     var mo = topojson.mesh(us, us.objects.states, (a, b) => a.id === stateID || b.id === stateID);
-    // console.log(stateID);
     txt.text(stateID);
 
-    // d3.select("#current-state").text(`${us.id}`); 
 
     momesh.datum(mo).attr("d", path); 
 }
-
+ //MouseOut
 function mouseLeavesState() {
     tooltip.attr("visibility", "hidden");
     momesh.attr("d", "");
@@ -121,53 +144,78 @@ function mouseLeavesState() {
       };
     });
 
-
+    //Updating Map based on year and slider
     function updateMap(data) {
       let selectedYear = +d3.select("#slider").property("value");
-      // console.log(selectedYear);
-
+    
       map.selectAll(".state")
         .style("fill", d => {
           const stateName = d.id; 
           const stateData = data[stateName] ? data[stateName][selectedYear] : null;
         });
     }
-
+    //Slider
     d3.select("#slider").on("input", function() {
       const selectedYear = +this.value;
       d3.select("#year-display").text(selectedYear);
-      updateMap(stateDict)
-      drawBarChart();
+      updateMap(stateDict);
+      if (selectedState) {
+        drawBarChart(); 
+      }
     });
 
     updateMap(stateDict);
 
 
-
+  //BarChart
   const svg2 = d3.select("#bargraph");
   const width2 = svg2.attr("width");
   const height2 = svg2.attr("height");
   const margins2 = { top: 20, right: 20, bottom: 100, left: 100 };
   const chartWidth2 = width2 - margins2.left - margins2.right;
   const chartHeight2 = height2 - margins2.top - margins2.bottom;
-
   let grid = svg2.append('g');
   let leftG = grid.append('g');
   let leftGridG = grid.append('g');
   let bottomG = grid.append('g');
   let chartArea2 = svg2.append('g').attr("transform", `translate(${margins2.left},${margins2.top})`);
+  //Labeling
+  svg2.append('text')
+              .attr('x', - (chartHeight2 / 2)-60)
+              .attr('y', margins2.left-70)
+              .attr('transform', 'rotate(-90)')
+              .attr('text-anchor', 'middle')
+              .text('Number of Registered Vehicles');
 
+  svg2.append('text')
+              .attr('x', width2 / 2)
+              .attr('y', margins2.left + 450)
+              .attr('text-anchor', 'middle')
+              .attr('font-size', '15px')
+              .text('Types of Vehicles');   
+
+   svg2.append('text')
+              .attr("id", "barTitle") 
+              .attr('x', width2 / 2)
+              .attr('y', margins2.left-64)
+              .attr("class", "title") 
+              .text('The Number of Registered Vehicles in 1950 in Alabama');
 
   function drawBarChart() {
+        if (!selectedState) return; 
         let selectedYear = +d3.select("#slider").property("value");
+
         barchartData = surveyData.filter( (d) => {return d['year'] == selectedYear;});
         // console.log(barchartData);
 
-        barchartData = barchartData.filter( (d) => {return d['state'] == 'Iowa';});
+        barchartData = barchartData.filter( (d) => {return d['state'] == selectedState;});
         // console.log(barchartData);
 
+        svg2.select("#barTitle") 
+           .text('The Number of Registered Vehicles in ' + selectedYear + ' in ' + selectedState);
+
        
-        stateData = surveyData.filter( (d) => {return d['state'] == 'Iowa';});
+        stateData = surveyData.filter( (d) => {return d['state'] == selectedState;});
 
         y_minMax = [0, d3.max(stateData, d => Math.max(d.Auto, d.Bus, d.Truck, d.Motorcycle,) ) ];
         const yScale = d3.scaleLinear()
@@ -180,29 +228,24 @@ function mouseLeavesState() {
           .padding(0.2);
 
 
-
+      //Gridlines and axis
         let leftAxis = d3.axisLeft(yScale);
-         
         leftG.attr('class', 'y axis')
           .attr('transform', `translate(${margins2.left-10},${margins2.top})`)
           .call(leftAxis);
-     
-
         let leftGridlines = d3.axisLeft(yScale)
           .tickSize(-chartWidth2 - 10)
           .tickFormat('');
         leftGridG.attr('class', 'y gridlines')
           .attr('transform', `translate(${margins2.left-10},${margins2.top})`)
           .call(leftGridlines);
-
-
         let bottomAxis = d3.axisBottom(xScale);
         bottomG.attr('class', 'x axis')
           .attr('transform', `translate(${margins2.left},${chartHeight2 + margins2.top + 10})`)
           .call(bottomAxis);
 
 
-
+      //Creating Rectangles for x-axis
         chartArea2.selectAll("rect.auto").data(barchartData)
                 .join("rect")
                 .attr("class","auto")
@@ -210,8 +253,6 @@ function mouseLeavesState() {
                 .attr("y", d => yScale(d.Auto) )
                 .attr("width", xScale.bandwidth())
                 .attr("height", d => yScale(0) - yScale(d.Auto)); 
-
-
         chartArea2.selectAll("rect.bus").data(barchartData)
                 .join("rect")
                 .attr("class","bus")
@@ -219,7 +260,6 @@ function mouseLeavesState() {
                 .attr("y", d => yScale(d.Bus) )
                 .attr("width", xScale.bandwidth())
                 .attr("height", d => yScale(0) - yScale(d.Bus)); 
-
         chartArea2.selectAll("rect.truck").data(barchartData)
                 .join("rect")
                 .attr("class","truck")
@@ -227,7 +267,6 @@ function mouseLeavesState() {
                 .attr("y", d => yScale(d.Truck) )
                 .attr("width", xScale.bandwidth())
                 .attr("height", d => yScale(0) - yScale(d.Truck)); 
-
         chartArea2.selectAll("rect.motor").data(barchartData)
                 .join("rect")
                 .attr("class","motor")
@@ -239,35 +278,32 @@ function mouseLeavesState() {
       };
       drawBarChart();
 
+    //Creating Tooltip
 
-let tooltipWidth = 120;
-let tooltipHeight = 20;
-
-let momesh = map.append("path")
-    .attr("class", "mouseover outline")
-    .style("stroke", "black")
-    .style("stroke-width", 3)
-    .style("fill", "none")
-    .attr("d", "");
-
-let tooltip = map.append("g")
-    .attr("class", "tooltip")
-    .attr("visibility", "hidden");
-
-tooltip.append("rect")
-    .attr("fill", "black")
-    .attr("opacity", 0.9)
-    .attr("x", -tooltipWidth / 2.0)
-    .attr("y", 0)
-    .attr("width", tooltipWidth)
-    .attr("height", tooltipHeight);
-
-let txt = tooltip.append("text")
-    .attr("fill", "white")
-    .attr("text-anchor", "middle")
-    .attr("alignment-baseline", "hanging")
-    .attr("x", 0)
-    .attr("y", 2);
+    let tooltipWidth = 120;
+    let tooltipHeight = 20;
+    let momesh = map.append("path")
+        .attr("class", "mouseover outline")
+        .style("stroke", "black")
+        .style("stroke-width", 3)
+        .style("fill", "none")
+        .attr("d", "");
+    let tooltip = map.append("g")
+        .attr("class", "tooltip")
+        .attr("visibility", "hidden");
+    tooltip.append("rect")
+        .attr("fill", "black")
+        .attr("opacity", 0.9)
+        .attr("x", -tooltipWidth / 2.0)
+        .attr("y", 0)
+        .attr("width", tooltipWidth)
+        .attr("height", tooltipHeight);
+    let txt = tooltip.append("text")
+        .attr("fill", "white")
+        .attr("text-anchor", "middle")
+        .attr("alignment-baseline", "hanging")
+        .attr("x", 0)
+        .attr("y", 2);
 
   }
 
@@ -280,3 +316,4 @@ let txt = tooltip.append("text")
 
 </body>
 </html>
+
