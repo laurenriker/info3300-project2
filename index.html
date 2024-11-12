@@ -355,7 +355,7 @@ function mouseLeavesState() {
 
     svg3.append('text')
                 .attr('x', width3 / 2)
-                .attr('y', margin3.top + 497)
+                .attr('y', margin3.top + 300)
                 .attr('text-anchor', 'middle')
                 .attr('font-size', '15px')
                 .text('Years');   
@@ -389,6 +389,7 @@ function mouseLeavesState() {
         year: new Date(+year, 0, 1),
         autoTotal: autoDict[year]
       }));
+      console.log(yearData);
 
       //axis and gridlines and scales
       vehicleMax = [0, d3.max(yearData, d => d.total) ];
@@ -479,36 +480,73 @@ function mouseLeavesState() {
 
         //Legend labels
         svg3.append('text')
-              .attr('x', width3 - 30)
-              .attr('y', height3 -30)
+              .attr('x', width3 - 200)
+              .attr('y', height3 - 30)
               .attr('text-anchor', 'middle')
               .attr('font-size', '15px')
               .style('color', 'purple')
-              .text('Motor'); 
+              .text('Motorcycle'); 
 
         svg3.append('text')
-              .attr('x', width3 - 30)
-              .attr('y', height3 - 45)
+              .attr('x', width3 - 500)
+              .attr('y', height3 - 30)
               .attr('text-anchor', 'middle')
               .attr('font-size', '15px')
               .style('color', 'red')
               .text('Auto'); 
 
         svg3.append('text')
-              .attr('x', width3 - 30)
-              .attr('y', height3 - 60)
+              .attr('x', width3 - 400)
+              .attr('y', height3 - 30)
               .attr('text-anchor', 'middle')
               .attr('font-size', '15px')
               .style('color', 'steelblue')
               .text('Bus'); 
 
         svg3.append('text')
-              .attr('x', width3 - 30)
-              .attr('y', height3 - 15)
+              .attr('x', width3 - 300)
+              .attr('y', height3 - 30)
               .attr('text-anchor', 'middle')
               .attr('font-size', '15px')
               .style('color', 'green')
               .text('Truck'); 
+        
+        
+        svg3.append('rect')
+          .join('rect')
+          .attr('class', 'barAuto')
+          .attr("fill", "red")
+          .attr("x",  width3 / 2 - 187)
+          .attr("y", margin3.left + 260)
+          .attr("height", 10)
+          .attr("width", 20);
+
+        svg3.append('rect')
+          .join('rect')
+          .attr('class', 'barBus')
+          .attr("fill", "steelblue")
+          .attr("x",  width3 / 2 - 84)
+          .attr("y", margin3.left + 260)
+          .attr("height", 10)
+          .attr("width", 20);
+
+        svg3.append('rect')
+          .join('rect')
+          .attr('class', 'barTruck')
+          .attr("fill", "green")
+          .attr("x",  width3 / 2 + 9)
+          .attr("y", margin3.left + 260)
+          .attr("height", 10)
+          .attr("width", 20);
+
+        svg3.append('rect')
+          .join('rect')
+          .attr('class', 'barMotor')
+          .attr("fill", "purple")
+          .attr("x",  width3 / 2 + 93)
+          .attr("y", margin3.left + 260)
+          .attr("height", 10)
+          .attr("width", 20);
 
         //then need to do rectangles - can copy what we did from p1
   
