@@ -394,33 +394,33 @@ function mouseLeavesState() {
       //axis and gridlines and scales
       vehicleMax = [0, d3.max(yearData, d => d.total) ];
       const yScale3 = d3.scaleLinear().domain(vehicleMax).range([chartHeight3, 0]);
-      let leftAxis = d3.axisLeft(yScale3)
+      let leftAxis3 = d3.axisLeft(yScale3)
       .tickFormat(d3.format(".2s"));
-      let leftGridlines = d3.axisLeft(yScale3)
+      let leftGridlines3 = d3.axisLeft(yScale3)
                             .tickSize(-chartWidth3-10)
                             .tickFormat("")
       leftG3.attr("class", "y axis")
         .attr("transform",`translate(${margin3.left-10},${margin3.top})`)
-        .call(leftAxis)
+        .call(leftAxis3)
       leftGridG3.attr("class", "y gridlines")
         .attr("transform",`translate(${margin3.left-10},${margin3.top})`)
-        .call(leftGridlines);
+        .call(leftGridlines3);
 
       const dateExtent = d3.extent(yearData, d => d.year);
       const xScale3 = d3.scaleTime().domain(dateExtent).range([0,chartWidth3]);
-      let bottomAxis = d3.axisBottom(xScale3)
-      bottomG.attr('class', 'x axis')
-      .attr('transform', `translate(${margins2.left},${chartHeight2 + margins2.top + 10})`)
-      .call(bottomAxis);
-      let bottomGridlines = d3.axisBottom(xScale3)
+      let bottomAxis3 = d3.axisBottom(xScale3)
+      bottomG3.attr('class', 'x axis')
+      .attr('transform', `translate(${margin3.left},${chartHeight2 + margin3.top + 10})`)
+      .call(bottomAxis3);
+      let bottomGridlines3 = d3.axisBottom(xScale3)
                               .tickSize(-chartHeight3-10)
                               .tickFormat("")
        bottomGridG3.attr("class", "x axis")
            .attr("transform",`translate(${margin3.left},${chartHeight3+margin3.top+10})`)
-           .call(bottomAxis);
+           .call(bottomAxis3);
       bottomG3.attr("class", "x gridlines")
         .attr("transform",`translate(${margin3.left},${chartHeight3+margin3.top+10})`)
-        .call(bottomGridlines);
+        .call(bottomGridlines3);
 
 
       //Bus Line
