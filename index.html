@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,12 +29,12 @@
 
 <body>
   <p>Current Year: <span id="year-display">1900</span></p>
-  <p id="current-state">Current State:</p>
+  <!-- <p id="current-state">Current State:</p> -->
   <svg id="choropleth" height="600" width="900" style="background: #445; margin-top:50px"></svg>
   <input type="range" id="slider" min="1900" max="2020" step="1" value="1900">
   <svg id="bargraph" height="600" width="900"></svg>
 
-  <!-- <div id="tooltip" class="tooltip"></div> -->
+  <div id="tooltip" class="tooltip"></div>
 <script>
   const svg = d3.select("#choropleth");
   const width = svg.attr("width");
@@ -60,8 +61,8 @@
     var statesMesh = topojson.mesh(us, us.objects.states); 
     var projection = d3.geoAlbersUsa().fitSize([mapWidth, mapHeight], states);
     var path = d3.geoPath().projection(projection);
-    console.log(states);
-    console.log(statesMesh);
+    // console.log(states);
+    // console.log(statesMesh);
 
     let gridlines = d3.geoGraticule10();
     map.append("path").attr("class","gridlines").attr("d", path(gridlines));
@@ -71,17 +72,15 @@
                        .join("path")
                        .attr("class", "state")
                        .attr("d", path)
-                       .on('mouseover',  mouseEntersState )
-                       .on('mouseout',  mouseLeavesState );
+                       .on('mouseover',  mouseEntersState)
+                       .on('mouseout',  mouseLeavesState);
 
-function mouseEntersState() {
+
+    function mouseEntersState() {
     let state = d3.select(this); 
     let stateID = state.datum().id;  
     let stateData = stateDict[stateID];
-
-    txt.text(stateData.state_name);
-    txt2.text(stateData.total);
-
+ 
     let bounds = path.bounds(state.datum());
     let xPos = (bounds[0][0] + bounds[1][0]) / 2;
     let yPos = bounds[1][1] - 15;
@@ -91,6 +90,11 @@ function mouseEntersState() {
         .attr("visibility", "visible");
 
     var mo = topojson.mesh(us, us.objects.states, (a, b) => a.id === stateID || b.id === stateID);
+    // console.log(stateID);
+    txt.text(stateID);
+
+    // d3.select("#current-state").text(`${us.id}`); 
+
     momesh.datum(mo).attr("d", path); 
 }
 
@@ -118,18 +122,9 @@ function mouseLeavesState() {
     });
 
 
-    // slider.on("change", sliderChanged)
-    // function sliderChanged (
-    //   currentYear = slider.value
-    //   updateMap()
-    // );
-
-    // // sliderChanged()
-
-
     function updateMap(data) {
       let selectedYear = +d3.select("#slider").property("value");
-      console.log(selectedYear);
+      // console.log(selectedYear);
 
       map.selectAll(".state")
         .style("fill", d => {
@@ -163,14 +158,13 @@ function mouseLeavesState() {
   let chartArea2 = svg2.append('g').attr("transform", `translate(${margins2.left},${margins2.top})`);
 
 
-
   function drawBarChart() {
         let selectedYear = +d3.select("#slider").property("value");
         barchartData = surveyData.filter( (d) => {return d['year'] == selectedYear;});
-        console.log(barchartData);
+        // console.log(barchartData);
 
         barchartData = barchartData.filter( (d) => {return d['state'] == 'Iowa';});
-        console.log(barchartData);
+        // console.log(barchartData);
 
        
         stateData = surveyData.filter( (d) => {return d['state'] == 'Iowa';});
@@ -185,7 +179,6 @@ function mouseLeavesState() {
           .range([0, chartWidth2])
           .padding(0.2);
 
-        // xScale("Auto")
 
 
         let leftAxis = d3.axisLeft(yScale);
@@ -248,7 +241,7 @@ function mouseLeavesState() {
 
 
 let tooltipWidth = 120;
-let tooltipHeight = 40;
+let tooltipHeight = 20;
 
 let momesh = map.append("path")
     .attr("class", "mouseover outline")
@@ -276,17 +269,10 @@ let txt = tooltip.append("text")
     .attr("x", 0)
     .attr("y", 2);
 
-let txt2 = tooltip.append("text")
-    .attr("fill", "white")
-    .attr("text-anchor", "middle")
-    .attr("alignment-baseline", "hanging")
-    .attr("x", 0)
-    .attr("y", 22);
   }
 
   requestData();
 
-  // Bar Chart for states
    
 
 
