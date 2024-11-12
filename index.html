@@ -370,23 +370,23 @@ function mouseLeavesState() {
     function drawLinePlot () {
       //converting all of the dictionaries into datasets
       const yearData = Object.keys(yearDict).map(year => ({
-        year: +year,
+        year: new Date(+year, 0, 1), //date object format from https://www.w3schools.com/jsref/jsref_date_new.asp
         total: yearDict[year]
       }));
       const busData = Object.keys(busDict).map(year => ({
-        year: +year,
+        year: new Date(+year, 0, 1),
         busTotal: busDict[year]
       }));
       const motorData = Object.keys(motorDict).map(year => ({
-        year: +year,
+        year: new Date(+year, 0, 1),
         motorTotal: motorDict[year]
       }));
       const truckData = Object.keys(truckDict).map(year => ({
-        year: +year,
+        year: new Date(+year, 0, 1),
         truckTotal: truckDict[year]
       }));
       const autoData = Object.keys(autoDict).map(year => ({
-        year: +year,
+        year: new Date(+year, 0, 1),
         autoTotal: autoDict[year]
       }));
 
