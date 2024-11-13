@@ -6,6 +6,17 @@
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://d3js.org/topojson.v3.min.js"></script>
   <style>
+    #container {
+  display: flex;
+    }
+    #left-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+    }
+    #bargraph {
+      margin-top: 60px
+    }
     .state {
       fill: lightblue;
       stroke: black;  
@@ -46,9 +57,15 @@
   <p>Current Year: <span id="year-display">1950</span></p>
   <p>Current State: <span id="state-display">Alabama</span></p>
   <svg id="lineplot" height="400" width="700"></svg>
-  <svg id="choropleth" height="400" width="700" style="background: #445; margin-top:50px"></svg>
-  <input type="range" id="slider" min="1900" max="2020" step="1" value="1950">
-  <svg id="bargraph" height="400" width="700"></svg>
+
+<div id="container">
+  <div id="left-panel">
+  <svg id="choropleth" height="400" width="550" style="background: #445; margin-top:20px"></svg>
+  <input type="range" id="slider" min="1900" max="2020" step="1" value="1950" style="width: 100%; margin-top: 10px;">
+  </div>
+  <svg id="bargraph" height="400" width="550"></svg>
+</div>
+
   <div id="tooltip" class="tooltip"></div>
 
 <script>
