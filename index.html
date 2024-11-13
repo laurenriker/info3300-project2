@@ -37,6 +37,7 @@
     right: 10px; /* Adjust for horizontal positioning */
     z-index: 1000; /* Ensure it's on top of other elements */
 }
+
       
   </style>
 </head>
@@ -44,11 +45,11 @@
 <body>
   <p>Current Year: <span id="year-display">1950</span></p>
   <p>Current State: <span id="state-display">Alabama</span></p>
+  <svg id="lineplot" height="400" width="700"></svg>
   <svg id="choropleth" height="400" width="700" style="background: #445; margin-top:50px"></svg>
   <input type="range" id="slider" min="1900" max="2020" step="1" value="1950">
   <svg id="bargraph" height="400" width="700"></svg>
   <div id="tooltip" class="tooltip"></div>
-  <svg id="lineplot" height="400" width="700"></svg>
 
 <script>
   const svg = d3.select("#choropleth");
@@ -263,6 +264,7 @@ function mouseLeavesState() {
         chartArea2.selectAll("rect.auto").data(barchartData)
                 .join("rect")
                 .attr("class","auto")
+                .attr("fill", "red")
                 .attr("x", xScale("Auto") )
                 .attr("y", d => yScale(d.Auto) )
                 .attr("width", xScale.bandwidth())
@@ -270,6 +272,7 @@ function mouseLeavesState() {
         chartArea2.selectAll("rect.bus").data(barchartData)
                 .join("rect")
                 .attr("class","bus")
+                .attr("fill", "steelblue")
                 .attr("x", xScale("Bus") )
                 .attr("y", d => yScale(d.Bus) )
                 .attr("width", xScale.bandwidth())
@@ -277,6 +280,7 @@ function mouseLeavesState() {
         chartArea2.selectAll("rect.truck").data(barchartData)
                 .join("rect")
                 .attr("class","truck")
+                .attr("fill", "green")
                 .attr("x", xScale("Truck") )
                 .attr("y", d => yScale(d.Truck) )
                 .attr("width", xScale.bandwidth())
@@ -284,6 +288,7 @@ function mouseLeavesState() {
         chartArea2.selectAll("rect.motor").data(barchartData)
                 .join("rect")
                 .attr("class","motor")
+                .attr("fill", "purple")
                 .attr("x", xScale("Motorcycle") )
                 .attr("y", d => yScale(d.Motorcycle) )
                 .attr("width", xScale.bandwidth())
