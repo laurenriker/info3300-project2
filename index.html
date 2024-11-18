@@ -49,6 +49,14 @@
     z-index: 1000; /* Ensure it's on top of other elements */
 }
 
+#year-label-1900, #year-label-2020 {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+  top: 15px; 
+}
+
+
       
   </style>
 </head>
@@ -60,11 +68,16 @@
 
 <div id="container">
   <div id="left-panel">
-  <svg id="choropleth" height="400" width="550" style="background: #445; margin-top:20px"></svg>
-  <input type="range" id="slider" min="1900" max="2020" step="1" value="1950" style="width: 100%; margin-top: 10px;">
+    <svg id="choropleth" height="400" width="550" style="background: #445; margin-top:20px"></svg>
+    <div id="slider-container" style="position: relative; width: 100%; margin-top: 10px;">
+      <span id="year-label-1900" style="position: absolute; left: 0;">1900</span>
+      <input type="range" id="slider" min="1900" max="2020" step="1" value="1950" style="width: 100%;">
+      <span id="year-label-2020" style="position: absolute; right: 0;">2020</span>
+    </div>
   </div>
   <svg id="bargraph" height="400" width="550"></svg>
 </div>
+
 
   <div id="tooltip" class="tooltip"></div>
 
@@ -76,6 +89,16 @@
   const mapWidth = width - margin.left - margin.right;
   const mapHeight = height - margin.top - margin.bottom;
   const map = svg.append("g").attr("transform","translate("+margin.left+","+margin.top+")");
+
+  
+  svg.append("text")
+   .attr("id", "title")
+   .attr("x", width / 2)
+   .attr("y", margin.top / 2)
+   .attr("text-anchor", "middle")
+   .style("font-size", "20px")
+   .text("Choropleth Map of Motor Vehicle Registrations");
+
 
   let stateDict = {};      
   let autoDict = {};     
@@ -89,6 +112,8 @@
   var selectedState = 'Alabama';  
 
   const surveyData = d3.csv("Motor_Vehicle_Registrations_Dashboard_data.csv");
+
+  
 
        
   //An async function to load data and build the map
@@ -108,7 +133,6 @@
     let gridlines = d3.geoGraticule10();
     map.append("path").attr("class","gridlines").attr("d", path(gridlines));
 
-       
     let statePaths = map.selectAll("path.state").data(states.features)
                        .join("path")
                        .attr("class", "state")
@@ -502,7 +526,7 @@ function mouseLeavesState() {
 
         //Legend labels
         svg3.append('text')
-              .attr('x', width3 - 200)
+              .attr('x', width3 - 150)
               .attr('y', height3 - 30)
               .attr('text-anchor', 'middle')
               .attr('font-size', '15px')
@@ -510,7 +534,7 @@ function mouseLeavesState() {
               .text('Motorcycle'); 
 
         svg3.append('text')
-              .attr('x', width3 - 500)
+              .attr('x', width3 - 410)
               .attr('y', height3 - 30)
               .attr('text-anchor', 'middle')
               .attr('font-size', '15px')
@@ -518,7 +542,7 @@ function mouseLeavesState() {
               .text('Auto'); 
 
         svg3.append('text')
-              .attr('x', width3 - 400)
+              .attr('x', width3 - 330)
               .attr('y', height3 - 30)
               .attr('text-anchor', 'middle')
               .attr('font-size', '15px')
@@ -526,7 +550,7 @@ function mouseLeavesState() {
               .text('Bus'); 
 
         svg3.append('text')
-              .attr('x', width3 - 300)
+              .attr('x', width3 - 250)
               .attr('y', height3 - 30)
               .attr('text-anchor', 'middle')
               .attr('font-size', '15px')
@@ -538,7 +562,7 @@ function mouseLeavesState() {
           .join('rect')
           .attr('class', 'barAuto')
           .attr("fill", "red")
-          .attr("x",  width3 / 2 - 187)
+          .attr("x",  width3 / 2 - 172)
           .attr("y", margin3.left + 260)
           .attr("height", 10)
           .attr("width", 20);
@@ -547,7 +571,7 @@ function mouseLeavesState() {
           .join('rect')
           .attr('class', 'barBus')
           .attr("fill", "steelblue")
-          .attr("x",  width3 / 2 - 84)
+          .attr("x",  width3 / 2 - 88)
           .attr("y", margin3.left + 260)
           .attr("height", 10)
           .attr("width", 20);
@@ -556,7 +580,7 @@ function mouseLeavesState() {
           .join('rect')
           .attr('class', 'barTruck')
           .attr("fill", "green")
-          .attr("x",  width3 / 2 + 9)
+          .attr("x",  width3 / 2 - 15)
           .attr("y", margin3.left + 260)
           .attr("height", 10)
           .attr("width", 20);
@@ -565,7 +589,7 @@ function mouseLeavesState() {
           .join('rect')
           .attr('class', 'barMotor')
           .attr("fill", "purple")
-          .attr("x",  width3 / 2 + 93)
+          .attr("x",  width3 / 2 + 68)
           .attr("y", margin3.left + 260)
           .attr("height", 10)
           .attr("width", 20);
