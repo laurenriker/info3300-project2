@@ -67,9 +67,12 @@
   <svg id="lineplot" height="400" width="700"></svg>
 
 <div id="container">
+  <div id="map-title" style="position: absolute;top: 475px; left: 90px;  font-size: 20px;font-weight: bold; text-align: center; z-index: 2;">
+    Choropleth Map of Motor Vehicle Registrations
+  </div>
   <div id="left-panel">
     <svg id="choropleth" height="400" width="550" style="background: #445; margin-top:20px"></svg>
-    <div id="slider-container" style="position: relative; width: 100%; margin-top: 10px;">
+    <div id="slider-container" style="position: absolute; top: 920px; left: 400px; width: 400px;">
       <span id="year-label-1900" style="position: absolute; left: 0;">1900</span>
       <input type="range" id="slider" min="1900" max="2020" step="1" value="1950" style="width: 100%;">
       <span id="year-label-2020" style="position: absolute; right: 0;">2020</span>
@@ -91,13 +94,13 @@
   const map = svg.append("g").attr("transform","translate("+margin.left+","+margin.top+")");
 
   
-  svg.append("text")
-   .attr("id", "title")
-   .attr("x", width / 2)
-   .attr("y", margin.top / 2)
-   .attr("text-anchor", "middle")
-   .style("font-size", "20px")
-   .text("Choropleth Map of Motor Vehicle Registrations");
+  //svg.append("text")
+   //.attr("id", "title")
+   //.attr("x", width / 2)
+   //.attr("y", margin.top / 2)
+   //.attr("text-anchor", "middle")
+   //.style("font-size", "20px")
+   //.text("Choropleth Map of Motor Vehicle Registrations");
 
 
   let stateDict = {};      
