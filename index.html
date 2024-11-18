@@ -53,32 +53,57 @@
       z-index: 1000; 
     }
 
-  #year-label-1900, #year-label-2020 {
-    font-size: 14px;
-    font-weight: bold;
-    color: #333;
-    top: 15px; 
-  }
+    #year-label-1900, #year-label-2020 {
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+      top: 15px; 
+    }
 
-  .info-container p {
-    margin: 0;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-    max-width: 200px;
-    white-space: nowrap;
-    overflow: hidden;
+    .info-container p {
+      margin: 0;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
       text-overflow: ellipsis;
-  }
+    }
 
-  #map-title {
-    margin: 0;
-    padding: 0;
-    font-size: 20px;
-    font-weight: bold;
-    text-align: center;
-  }
+    #map-title {
+      margin: 0;
+      padding: 0;
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+
+    #lineplot-container {
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+      margin-bottom: 20px;
+    }
+
+    #details-container {
+      margin-left: 20px;
+      width: 300px; 
+    }
+
+    #user-guide {
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      padding: 15px;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
 
   </style>
 </head>
@@ -88,8 +113,20 @@
     <p>Current Year: <span id="year-display">1950</span></p>
     <p>Current State: <span id="state-display">Alabama</span></p>
   </div>  
-  <svg id="lineplot" height="400" width="700"></svg>
-
+  <div id="lineplot-container" >
+    <svg id="lineplot" height="400" width="700"></svg>
+    <div id="details-container">
+      <div id="user-guide">
+        <strong>Explore U.S. Vehicle Registration Trends!</strong>
+        <ul>
+          <li><strong>Line Plot:</strong> View the total number of registered vehicles across all years.</li>
+          <li><strong>Map:</strong> Click on a state to see its data highlighted in the line plot.</li>
+          <li><strong>Bar Chart:</strong> Examine vehicle registrations for a specific year and state.</li>
+        </ul>
+        <p>Use the <strong>slider</strong> at the bottom to change the year and update the visualizations dynamically.</p>
+      </div>
+    </div>
+  </div>
 <div id="container">
   <div id="map-title" style="position: absolute;top: 475px; left: 90px;  font-size: 20px;font-weight: bold; text-align: center; z-index: 2;">
     Map of the United States
