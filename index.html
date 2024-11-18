@@ -7,16 +7,19 @@
   <script src="https://d3js.org/topojson.v3.min.js"></script>
   <style>
     #container {
-  display: flex;
+      display: flex;
     }
+
     #left-panel {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
+
     #bargraph {
       margin-top: 60px
     }
+
     .state {
       fill: lightblue;
       stroke: black;  
@@ -25,39 +28,38 @@
     .state.selected {
       fill: pink;
     }
-      .outline {
-        fill: none;
-        stroke: black;
-        stroke-width: 1px;
-      }
-      .gridlines {
-          fill: none;
-          stroke: grey;
-          stroke-width: 1px;
-      }
+    .outline {
+      fill: none;
+      stroke: black;
+      stroke-width: 1px;
+    }
 
-      .title {
-        font-size: 20px;        
-        font-weight: bold;       
-        text-anchor: middle;    
-      }
+    .gridlines {
+      fill: none;
+      stroke: grey;
+      stroke-width: 1px;
+    }
 
-      .legend {
-    position: fixed;
-    top: 10px; /* Adjust the top value to position it higher on the screen */
-    right: 10px; /* Adjust for horizontal positioning */
-    z-index: 1000; /* Ensure it's on top of other elements */
-}
+    .title {
+      font-size: 20px;        
+      font-weight: bold;       
+      text-anchor: middle;    
+    }
 
-#year-label-1900, #year-label-2020 {
-  font-size: 14px;
-  font-weight: bold;
-  color: #333;
-  top: 15px; 
-}
+    .legend {
+      position: fixed;
+      top: 10px; 
+      right: 10px; 
+      z-index: 1000; 
+    }
 
+  #year-label-1900, #year-label-2020 {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    top: 15px; 
+  }
 
-      
   </style>
 </head>
 
@@ -81,7 +83,6 @@
   <svg id="bargraph" height="400" width="550"></svg>
 </div>
 
-
   <div id="tooltip" class="tooltip"></div>
 
 <script>
@@ -93,33 +94,19 @@
   const mapHeight = height - margin.top - margin.bottom;
   const map = svg.append("g").attr("transform","translate("+margin.left+","+margin.top+")");
 
-  
-  //svg.append("text")
-   //.attr("id", "title")
-   //.attr("x", width / 2)
-   //.attr("y", margin.top / 2)
-   //.attr("text-anchor", "middle")
-   //.style("font-size", "20px")
-   //.text("Choropleth Map of Motor Vehicle Registrations");
-
-
   let stateDict = {};      
   let autoDict = {};     
   let yearDict = {};
   let busDict = {};     
   let truckDict = {};     
   let motorDict = {};
-   
   
   var currentYear = 1950;
   var selectedState = 'Alabama';  
 
   const surveyData = d3.csv("Motor_Vehicle_Registrations_Dashboard_data.csv");
-
-  
-
        
-  //An async function to load data and build the map
+  //Async function to load data and build the map
   const requestData = async function() {
     
     //Import data as synchronous call to topoJSON data file
@@ -130,8 +117,6 @@
     var statesMesh = topojson.mesh(us, us.objects.states); 
     var projection = d3.geoAlbersUsa().fitSize([mapWidth, mapHeight], states);
     var path = d3.geoPath().projection(projection);
-    // console.log(states);
-    // console.log(statesMesh);
 
     let gridlines = d3.geoGraticule10();
     map.append("path").attr("class","gridlines").attr("d", path(gridlines));
@@ -159,7 +144,6 @@
 
     //Tooltip when hovering over the states
     function mouseEntersState() {
-    // d3.select("#current-state").text(`${us.id}`); 
 
     let state = d3.select(this); 
     let stateID = state.datum().id;  
@@ -264,15 +248,12 @@ function mouseLeavesState() {
         let selectedYear = +d3.select("#slider").property("value");
 
         barchartData = surveyData.filter( (d) => {return d['year'] == selectedYear;});
-        // console.log(barchartData);
 
-        barchartData = barchartData.filter( (d) => {return d['state'] == selectedState;});
-        // console.log(barchartData);
+        barchartData = barchartData.filter( (d) => {return d['state'] == selectedState;});;
 
         svg2.select("#barTitle") 
            .text('The Number of Registered Vehicles in ' + selectedYear + ' in ' + selectedState);
 
-       
         stateData = surveyData.filter( (d) => {return d['state'] == selectedState;});
 
         y_minMax = [0, d3.max(stateData, d => Math.max(d.Auto, d.Bus, d.Truck, d.Motorcycle,) ) ];
@@ -341,10 +322,7 @@ function mouseLeavesState() {
       };
       drawBarChart();
 
-
-    
     // LinePlot 
- 
     //Setting up dictionaries for each vehicle dataset
     surveyData.forEach(d => {
        if (!autoDict[d.year]) {
@@ -379,7 +357,6 @@ function mouseLeavesState() {
     });
 
     //making graph
-
     const svg3 = d3.select("svg#lineplot");
     const width3 = svg.attr("width");
     const height3 = svg.attr("height");
@@ -471,7 +448,6 @@ function mouseLeavesState() {
         .attr("transform",`translate(${margin3.left},${chartHeight3+margin3.top+10})`)
         .call(bottomGridlines3);
 
-
       //Bus Line
       const busLine = d3.line()
                       .x( d => xScale3(d.year) )
@@ -560,7 +536,6 @@ function mouseLeavesState() {
               .style('color', 'green')
               .text('Truck'); 
         
-        
         svg3.append('rect')
           .join('rect')
           .attr('class', 'barAuto')
@@ -596,16 +571,11 @@ function mouseLeavesState() {
           .attr("y", margin3.left + 260)
           .attr("height", 10)
           .attr("width", 20);
-
-        //then need to do rectangles - can copy what we did from p1
-  
     }
     //call lineplot
     drawLinePlot ()   
 
-
     //Creating Tooltip
-
     let tooltipWidth = 120;
     let tooltipHeight = 20;
     let momesh = map.append("path")
@@ -634,8 +604,6 @@ function mouseLeavesState() {
   }
 
   requestData();
-
-  
 
 </script>
 
