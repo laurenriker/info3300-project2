@@ -60,17 +60,39 @@
     top: 15px; 
   }
 
+  .info-container p {
+    margin: 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+      text-overflow: ellipsis;
+  }
+
+  #map-title {
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+  }
+
   </style>
 </head>
 
 <body>
-  <p>Current Year: <span id="year-display">1950</span></p>
-  <p>Current State: <span id="state-display">Alabama</span></p>
+  <div class="info-container">
+    <p>Current Year: <span id="year-display">1950</span></p>
+    <p>Current State: <span id="state-display">Alabama</span></p>
+  </div>  
   <svg id="lineplot" height="400" width="700"></svg>
 
 <div id="container">
   <div id="map-title" style="position: absolute;top: 475px; left: 90px;  font-size: 20px;font-weight: bold; text-align: center; z-index: 2;">
-    Choropleth Map of Motor Vehicle Registrations
+    Map of the United States
   </div>
   <div id="left-panel">
     <svg id="choropleth" height="400" width="550" style="background: #445; margin-top:20px"></svg>
@@ -391,7 +413,7 @@ function mouseLeavesState() {
                 .attr('x', width3 / 2)
                 .attr('y', margin3.top / 2)
                 .attr("class", "title") 
-                .text('The Total Number of Registered Vehicles throughout the years');
+                .text('The Total Number of Registered Vehicles Throughout the Years');
     //line plot function
     function drawLinePlot () {
       //converting all of the dictionaries into datasets
