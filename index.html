@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,7 +27,7 @@
     }
 
     .state.selected {
-      fill: lightgray;
+      fill: black;
     }
     .outline {
       fill: none;
@@ -83,6 +84,14 @@
       text-overflow: ellipsis;
     }
 
+    .info-container {
+      display: flex;
+      flex-direction: row;
+      margin-bottom: 20px;
+      margin-left: 50px;
+
+    }
+
     #map-title {
       margin: 0;
       padding: 0;
@@ -137,24 +146,25 @@
 </head>
 
 <body>
-  <div class="info-container">
-    <p>Current Year: <span id="year-display">1950</span></p>
-    <p>Current State: <span id="state-display">Alabama</span></p>
-  </div>  
+
   <div id="lineplot-container" >
     <svg id="lineplot" height="400" width="700"></svg>
     <div id="details-container">
       <div id="user-guide">
         <strong>Explore U.S. Vehicle Registration Trends!</strong>
         <ul>
-          <li><strong>Line Plot:</strong> View the total number of registered vehicles across all years.</li>
-          <li><strong>Map:</strong> Click on a state to see its data highlighted in the line plot.</li>
-          <li><strong>Bar Chart:</strong> Examine vehicle registrations for a specific year and state.</li>
+          <li><strong>Line Plot:</strong> View the total number of registered vehicles in the USA across all years.</li>
+          <li><strong>US States Map:</strong> Click on a <strong>state</strong> to see its data highlighted in the bar graph to the right.</li>
+          <li><strong>Bar Chart:</strong> Examine vehicle registrations for a specific year and state that you select.</li>
         </ul>
         <p>Use the <strong>slider</strong> at the bottom to change the year and update the visualizations dynamically.</p>
       </div>
     </div>
   </div>
+  <div class="info-container">
+    <p>Selected Year: <span id="year-display">1950</span></p>
+    <p>Selected State: <span id="state-display">Alabama</span></p>
+  </div>  
 <div id="container">
   <h1 id="map-title">
     Map of the United States
@@ -343,7 +353,7 @@ function mouseLeavesState() {
 
         stateData = surveyData.filter( (d) => {return d['state'] == selectedState;});
 
-        y_minMax = [0, d3.max(stateData, d => Math.max(d.Auto, d.Bus, d.Truck, d.Motorcycle,) ) ];
+        y_minMax = [0, d3.max(surveyData, d => Math.max(d.Auto, d.Bus, d.Truck, d.Motorcycle,) ) ];
         const yScale = d3.scaleLinear()
           .domain(y_minMax)
           .range([chartHeight2, 0]);
@@ -408,6 +418,7 @@ function mouseLeavesState() {
 
       };
       drawBarChart();
+      
 
     // LinePlot 
     //Setting up dictionaries for each vehicle dataset
@@ -478,7 +489,7 @@ function mouseLeavesState() {
                 .attr('x', width3 / 2)
                 .attr('y', margin3.top / 2)
                 .attr("class", "title") 
-                .text('The Total Number of Registered Vehicles Throughout the Years');
+                .text('The Total Number of Registered Vehicles in the USA');
     //line plot function
     function drawLinePlot () {
       //converting all of the dictionaries into datasets
@@ -696,3 +707,4 @@ function mouseLeavesState() {
 
 </body>
 </html>
+
