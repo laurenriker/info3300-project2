@@ -170,7 +170,7 @@
     </div>
   </div>
   <div class="info-container">
-    <p>Selected Year: <span id="year-display">1950</span></p>
+    <p>Selected Year: <span id="year-display">1960</span></p>
     <p>Selected State: <span id="state-display">Alabama</span></p>
   </div>  
 <div id="container">
@@ -181,7 +181,7 @@
     <svg id="choropleth" height="400" width="550"></svg>
     <div id="slider-container">
       <span id="year-label-1900">1900</span>
-      <input type="range" id="slider" min="1900" max="2020" step="1" value="1950">
+      <input type="range" id="slider" min="1900" max="2020" step="1" value="1960">
       <span id="year-label-2020">2020</span>
     </div>
   </div>
@@ -206,7 +206,7 @@
   let truckDict = {};     
   let motorDict = {};
   
-  var currentYear = 1950;
+  var currentYear = 1960;
   var selectedState = 'Alabama';  
 
   const surveyData = d3.csv("Motor_Vehicle_Registrations_Dashboard_data.csv");
@@ -346,7 +346,7 @@ function mouseLeavesState() {
               .attr('x', width2 / 2)
               .attr('y', margins2.top / 2)
               .attr("class", "title") 
-              .text('The Number of Registered Vehicles in 1950 in Alabama');
+              .text('The Number of Registered Vehicles in 1960 in Alabama');
   //call bar chart function
   function drawBarChart() {
         if (!selectedState) return; 
