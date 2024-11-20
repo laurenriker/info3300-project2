@@ -80,13 +80,14 @@
     .info-container p {
       margin: 0;
       padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      background-color: #f9f9f9;
       max-width: 200px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      /* background-color: #f9f9f9; */
+
     }
 
     .info-container {
@@ -94,7 +95,7 @@
       flex-direction: row;
       margin-bottom: 20px;
       margin-left: 50px;
-
+     
     }
 
     #map-title {
@@ -329,7 +330,7 @@ function mouseLeavesState() {
   //Labeling
   svg2.append('text')
               .attr('x', - (chartHeight2 / 2)-60)
-              .attr('y', margins2.left-70)
+              .attr('y', margins2.left-60)
               .attr('transform', 'rotate(-90)')
               .attr('text-anchor', 'middle')
               .text('Number of Registered Vehicles');
@@ -480,7 +481,7 @@ function mouseLeavesState() {
     //Labeling
     svg3.append('text')
                 .attr('x', - (chartHeight3 / 2)-60)
-                .attr('y', margin3.left-70)
+                .attr('y', margin3.left-60)
                 .attr('transform', 'rotate(-90)')
                 .attr('text-anchor', 'middle')
                 .text('Number of Registered Vehicles');
